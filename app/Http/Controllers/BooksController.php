@@ -3,19 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\BookInterface;
-use App\Models\User;
 use App\Models\UserBook;
 use Exception;
-use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 
 class BooksController extends Controller
 {
-    private function getUser()
-    {
-        return User::where('remember_token', hash('md5', request()->cookie('library-token')))->first();
-    }
-
     public function search(Request $request, BookInterface $service)
     {
         $request->validate([
@@ -37,8 +30,8 @@ class BooksController extends Controller
 
     public function library(Request $request)
     {
-        $user = self::getUser();
-        $books = $user->books;
+        $user = auth()->user();
+        $books = $user->books ?? null;
         if ($request->get('favorite')) {
             $books = $books->where('favorite', true);
         }
@@ -48,7 +41,7 @@ class BooksController extends Controller
 
     public function info(BookInterface $service, $book_id)
     {
-        $user = self::getUser();
+        $user = auth()->user();
         $check_book = $user->books->where('id', $book_id)->first();
         if (!$check_book) {
             return redirect()->back()->withErrors('This book isn`t added');
@@ -65,7 +58,7 @@ class BooksController extends Controller
 
     public function add(BookInterface $service, $book_id)
     {
-        $user = self::getUser();
+        $user = auth()->user();
         $check_book = $user->books->where('book_id', $book_id)->first();
         if ($check_book) {
             return redirect()->back()->withErrors('This book has been already added');
@@ -90,7 +83,7 @@ class BooksController extends Controller
 
     public function delete($book_id)
     {
-        $user = self::getUser();
+        $user = auth()->user();
         $book = $user->books->where('id', $book_id)->first();
         if (!$book) {
             return redirect()->back()->withErrors('This book isn`t in the library');
@@ -106,7 +99,7 @@ class BooksController extends Controller
 
     public function changeFavorite($book_id)
     {
-        $user = self::getUser();
+        $user = auth()->user();
         $book = $user->books->where('id', $book_id)->first();
         if (!$book) {
             return redirect()->back()->withErrors('This book isn`t in the library');

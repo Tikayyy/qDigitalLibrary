@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -34,13 +35,13 @@ class User extends Authenticatable
     {
         parent::boot();
 
-        static::creating(function($model)
-        {
-            $model->password = hash('md5', $model->password);
+        static::creating(function ($model) {
+            $model->password = Hash::make($model->password);
         });
     }
 
-    public function books(){
+    public function books()
+    {
         return $this->hasMany(UserBook::class, 'user_id', 'id');
     }
 }
