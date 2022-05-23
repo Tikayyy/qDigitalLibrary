@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\BookInterface;
+use App\Services\GoogleBookApiService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,7 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(BookInterface::class, function ($app) {
+            return new GoogleBookApiService();
+        });
     }
 
     /**
