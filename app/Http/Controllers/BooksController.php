@@ -9,7 +9,14 @@ use Illuminate\Http\Request;
 
 class BooksController extends Controller
 {
-    public function search(Request $request, BookInterface $service)
+    private $service;
+
+    public function __construct(BookInterface $service)
+    {
+        $this->service = $service;
+    }
+
+    public function search(Request $request)
     {
         $request->validate([
             'search' => 'nullable|string'
@@ -19,7 +26,7 @@ class BooksController extends Controller
 
         if ($search) {
             try {
-                $books = $service->search($search);
+                $books = $this->service->search($search);
             } catch (Exception $e) {
                 return redirect()->back()->withErrors($e->getMessage());
             }
@@ -39,7 +46,7 @@ class BooksController extends Controller
         return view('pages.books-library', compact('books'));
     }
 
-    public function info(BookInterface $service, $book_id)
+    public function info($book_id)
     {
         $user = auth()->user();
         $check_book = $user->books->where('id', $book_id)->first();
@@ -48,7 +55,7 @@ class BooksController extends Controller
         }
 
         try {
-            $book = $service->info($check_book->book_id);
+            $book = $this->service->info($check_book->book_id);
         } catch (Exception $e) {
             return redirect()->back()->withErrors($e->getMessage());
         }
@@ -56,7 +63,7 @@ class BooksController extends Controller
         return view('pages.book-info', compact('book', 'book_id'));
     }
 
-    public function add(BookInterface $service, $book_id)
+    public function add($book_id)
     {
         $user = auth()->user();
         $check_book = $user->books->where('book_id', $book_id)->first();
@@ -65,7 +72,7 @@ class BooksController extends Controller
         }
 
         try {
-            $book = $service->info($book_id);
+            $book = $this->service->info($book_id);
 
             $user_book = new UserBook();
 
